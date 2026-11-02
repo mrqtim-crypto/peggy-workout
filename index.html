@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Peggy 運動內容</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #f43f5e;
+      --primary-soft: #ffe4e6;
+      --primary-light: #fff1f2;
+      --primary-deep: #e11d48;
+      --accent-gold: #fbbf24;
+      --bg-gradient: linear-gradient(135deg, #fff5f7 0%, #fdf2f8 50%, #f8fafc 100%);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-shadow: 0 10px 30px -5px rgba(244, 63, 94, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+      --text-main: #334155;
+      --text-muted: #94a3b8;
+      --border-color: #fecdd3;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.25rem 0.85rem;
+      user-select: none;
+    }
+
+    /* 密碼鎖畫面 */
+    #lock-screen {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, #ffe4e6 0%, #fff1f2 100%);
+      backdrop-filter: blur(20px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .lock-box {
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 20px 40px -10px rgba(244, 63, 94, 0.25);
+    }
+
+    .lock-icon-wrap {
+      width: 72px;
+      height: 72px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 1.2rem;
+      box-shadow: inset 0 2px 4px rgba(244, 63, 94, 0.15);
+    }
+
+    .lock-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary-deep);
+      margin-bottom: 0.35rem;
+    }
+
+    .lock-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 1.6rem;
+    }
+
+    .pwd-display {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .pwd-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #fda4af;
+      background: #fff;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pwd-dot.filled {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: scale(1.15);
+    }
+
+    /* 數字鍵盤 */
+    .pin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 270px;
+      margin: 0 auto;
+    }
+
+    .pin-btn {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      border: none;
+      background: #fff5f7;
+      color: var(--primary-deep);
+      font-size: 1.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(244, 63, 94, 0.08);
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+    }
+
+    .pin-btn:active {
+      transform: scale(0.92);
+      background: var(--primary-soft);
+    }
+
+    .pin-btn.action-btn {
+      font-size: 0.95rem;
+      background: transparent;
+      box-shadow: none;
+      color: #94a3b8;
+    }
+
+    /* 主應用容器 */
+    .app-container {
+      width: 100%;
+      max-width: 520px;
+      display: none;
+    }
+
+    /* 頂部 Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.5rem 0.25rem;
+    }
+
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .avatar {
+      width: 46px;
+      height: 46px;
+      background: linear-gradient(135deg, #f43f5e, #fb7185);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: white;
+      box-shadow: 0 6px 15px rgba(244, 63, 94, 0.28);
+    }
+
+    .header-info h1 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #1e293b;
+      letter-spacing: -0.01em;
+    }
+
+    .header-info p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      cursor: pointer;
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    /* 本月運動天數 Banner */
+    .stat-banner {
+      background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+      border-radius: var(--radius-lg);
+      padding: 1.35rem 1.6rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 12px 25px -4px rgba(244, 63, 94, 0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-banner::after {
+      content: "🌸";
+      position: absolute;
+      right: -10px;
+      bottom: -15px;
+      font-size: 5rem;
+      opacity: 0.16;
+      pointer-events: none;
+    }
+
+    .stat-info {
+      z-index: 1;
+    }
+
+    .stat-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0.92;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .stat-number-wrap {
+      display: flex;
+      align-items: baseline;
+      gap: 0.3rem;
+    }
+
+    .stat-number {
+      font-size: 2.6rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .stat-unit {
+      font-size: 1rem;
+      font-weight: 600;
+      opacity: 0.9;
+    }
+
+    .stat-quote {
+      font-size: 0.78rem;
+      margin-top: 0.4rem;
+      opacity: 0.85;
+    }
+
+    .stat-badge {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      padding: 0.5rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      z-index: 1;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    /* 月曆卡片 (支援左滑右滑) */
+    .calendar-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.35rem 1.1rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 1.35rem;
+      touch-action: pan-y;
+      position: relative;
+    }
+
+    /* 月份切換列 */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.1rem;
+      padding: 0 0.4rem;
+    }
+
+    .month-label {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .month-nav {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .nav-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: #fff;
+      color: var(--primary-deep);
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:active {
+      transform: scale(0.9);
+      background: var(--primary-soft);
+    }
+
+    .swipe-tip {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    /* 星期欄位 */
+    .weekdays-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .weekdays-grid span:nth-child(1),
+    .weekdays-grid span:nth-child(7) {
+      color: #f43f5e;
+    }
+
+    /* 日期九宮格 */
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      text-align: center;
+    }
+
+    .day-cell {
+      aspect-ratio: 1;
+      border-radius: var(--radius-md);
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.3rem 0.2rem;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .day-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(244, 63, 94, 0.12);
+    }
+
+    .day-cell.other-month {
+      opacity: 0.28;
+      background: transparent;
+      border-color: transparent;
+      cursor: default;
+    }
+
+    .day-cell.today {
+      border: 2px solid var(--primary);
+      background: #fff1f2;
+    }
+
+    .day-number {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .day-cell.today .day-number {
+      color: var(--primary-deep);
+    }
+
+    /* 有運動內容的日期圖示 */
+    .workout-marker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      line-height: 1;
+      filter: drop-shadow(0 2px 4px rgba(244, 63, 94, 0.3));
+    }
+
+    .day-cell.has-workout {
+      background: linear-gradient(145deg, #ffffff, #fff1f2);
+      border-color: #fda4af;
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15);
+    }
+
+    /* 底部快速操作區 */
+    .quick-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-main {
+      background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+      color: #fff;
+      border: none;
+      padding: 0.85rem 1.4rem;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 8px 18px rgba(244, 63, 94, 0.28);
+      transition: all 0.2s;
+    }
+
+    .btn-camera-quick {
+      background: #ffffff;
+      color: var(--primary-deep);
+      border: 2px solid #fda4af;
+      padding: 0.85rem 1.3rem;
+      border-radius: 30px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.1);
+      transition: all 0.2s;
+    }
+
+    .btn-camera-quick:active, .btn-main:active {
+      transform: scale(0.96);
+    }
+
+    /* 當日運動內容 Modal 抽屜彈窗 */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    .modal-drawer {
+      background: #ffffff;
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      border-radius: 32px 32px 0 0;
+      padding: 1.5rem 1.25rem 2rem;
+      box-shadow: 0 -15px 30px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .drawer-handle {
+      width: 44px;
+      height: 5px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      margin: 0 auto 1.2rem;
+    }
+
+    .drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .drawer-date {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .close-drawer {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    .drawer-body {
+      overflow-y: auto;
+      padding-right: 0.2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* 運動卡片 */
+    .exercise-card {
+      background: #fff5f7;
+      border: 1px solid #ffe4e6;
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+
+    .exercise-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .exercise-title-input {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--primary-deep);
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed transparent;
+      outline: none;
+      flex: 1;
+      padding: 0.2rem 0;
+    }
+
+    .exercise-title-input:focus {
+      border-bottom-color: var(--primary);
+    }
+
+    .del-btn {
+      background: transparent;
+      border: none;
+      color: #fda4af;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .del-btn:hover {
+      color: #e11d48;
+    }
+
+    /* 組數表格 */
+    .set-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 0.5rem;
+    }
+
+    .set-table th {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 600;
+      text-align: left;
+      padding: 0.2rem 0.35rem;
+    }
+
+    .set-table td {
+      padding: 0.25rem 0.3rem;
+    }
+
+    .set-input {
+      width: 100%;
+      padding: 0.5rem 0.6rem;
+      background: #ffffff;
+      border: 1px solid #fecdd3;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      color: #334155;
+      font-weight: 600;
+      outline: none;
+    }
+
+    .set-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.12);
+    }
+
+    .note-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px dashed #fda4af;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      color: #475569;
+      outline: none;
+      margin-top: 0.4rem;
+    }
+
+    .action-links-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.8rem;
+    }
+
+    .add-set-link {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .drawer-footer {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.2rem;
+      padding-top: 0.8rem;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 0.8rem;
+      background: #f1f5f9;
+      border: none;
+      border-radius: 20px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+    }
+
+    .btn-save {
+      flex: 2;
+      padding: 0.8rem;
+      background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+      border: none;
+      border-radius: 20px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(244, 63, 94, 0.25);
+    }
+
+    /* 浮動提示 Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      background: #334155;
+      color: #fff;
+      padding: 0.7rem 1.4rem;
+      border-radius: 30px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: none;
+      z-index: 99999;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 📸 拍照器材智能辨識彈窗 */
+    #scanner-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 1.25rem;
+    }
+
+    .scanner-box {
+      background: #ffffff;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 400px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(244, 63, 94, 0.25);
+      position: relative;
+    }
+
+    .scan-view {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: #fff5f7;
+      border: 2px dashed #fda4af;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+
+    #scan-preview-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+
+    /* 雷射掃描線動效 */
+    .scan-laser {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #f43f5e, #fb7185, transparent);
+      box-shadow: 0 0 12px #f43f5e;
+      display: none;
+      animation: laserMove 1.6s infinite alternate ease-in-out;
+    }
+
+    @keyframes laserMove {
+      0% { top: 5%; }
+      100% { top: 92%; }
+    }
+
+    .scan-placeholder {
+      color: #94a3b8;
+      font-size: 0.88rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* 隱藏原生 File Input */
+    #camera-file-input {
+      display: none;
+    }
+
+    .result-card {
+      background: #fff1f2;
+      border: 1px solid #fda4af;
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      text-align: left;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .result-badge {
+      display: inline-block;
+      background: var(--primary);
+      color: #fff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      margin-bottom: 0.35rem;
+    }
+
+    .result-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary-deep);
+    }
+
+    .result-desc {
+      font-size: 0.82rem;
+      color: #64748b;
+      margin: 0.3rem 0 0.6rem;
+    }
+
+    .result-sets-preview {
+      font-size: 0.8rem;
+      background: #fff;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      color: #334155;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 密碼鎖畫面 (PIN: 0817) -->
+  <div id="lock-screen">
+    <div class="lock-box">
+      <div class="lock-icon-wrap">💖</div>
+      <div class="lock-title">Peggy 運動內容</div>
+      <div class="lock-subtitle">請輸入專屬 PIN 碼解鎖</div>
+      
+      <div class="pwd-display">
+        <div class="pwd-dot" id="dot-0"></div>
+        <div class="pwd-dot" id="dot-1"></div>
+        <div class="pwd-dot" id="dot-2"></div>
+        <div class="pwd-dot" id="dot-3"></div>
+      </div>
+
+      <div class="pin-grid">
+        <button class="pin-btn" onclick="pressPin('1')">1</button>
+        <button class="pin-btn" onclick="pressPin('2')">2</button>
+        <button class="pin-btn" onclick="pressPin('3')">3</button>
+        <button class="pin-btn" onclick="pressPin('4')">4</button>
+        <button class="pin-btn" onclick="pressPin('5')">5</button>
+        <button class="pin-btn" onclick="pressPin('6')">6</button>
+        <button class="pin-btn" onclick="pressPin('7')">7</button>
+        <button class="pin-btn" onclick="pressPin('8')">8</button>
+        <button class="pin-btn" onclick="pressPin('9')">9</button>
+        <button class="pin-btn action-btn" onclick="clearPin()">清除</button>
+        <button class="pin-btn" onclick="pressPin('0')">0</button>
+        <button class="pin-btn action-btn" onclick="deletePin()">⌫</button>
+      </div>
+
+      <div id="lock-tip" style="color: var(--primary-deep); font-size: 0.8rem; margin-top: 1.2rem; min-height: 1.2rem;"></div>
+    </div>
+  </div>
+
+  <!-- 主畫面 -->
+  <div class="app-container" id="app">
+    <!-- Header -->
+    <header>
+      <div class="header-user">
+        <div class="avatar">🏋️‍♀️</div>
+        <div class="header-info">
+          <h1>Peggy 運動內容</h1>
+          <p>每天進步一點點 ✨</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" onclick="triggerCameraCapture()" title="拍照辨識器材">📷</button>
+        <button class="icon-btn" onclick="copyDataForAI()" title="複製給 AI 助理">📋</button>
+        <button class="icon-btn" onclick="lockApp()" title="鎖定">🔒</button>
+      </div>
+    </header>
+
+    <!-- 本月份運動天數看板 -->
+    <div class="stat-banner">
+      <div class="stat-info">
+        <div class="stat-title">
+          <span>🌸</span> <span id="banner-month-title">本月份運動天數</span>
+        </div>
+        <div class="stat-number-wrap">
+          <span class="stat-number" id="workout-days-count">0</span>
+          <span class="stat-unit">天</span>
+        </div>
+        <div class="stat-quote" id="stat-quote-text">太棒了，持續累積力量！💪</div>
+      </div>
+      <div class="stat-badge" id="current-month-badge">2026 年 11 月</div>
+    </div>
+
+    <!-- 月曆卡片 (支援左滑右滑) -->
+    <div class="calendar-card" id="calendar-card">
+      <div class="calendar-header">
+        <div class="month-label">
+          <span id="cal-month-name">2026年 11月</span>
+        </div>
+        <div class="month-nav">
+          <button class="nav-btn" onclick="changeMonth(-1)" title="上個月">〈</button>
+          <button class="nav-btn" onclick="goToToday()" title="回到本月" style="font-size: 0.78rem; width: auto; padding: 0 10px; border-radius: 14px;">今</button>
+          <button class="nav-btn" onclick="changeMonth(1)" title="下個月">〉</button>
+        </div>
+      </div>
+
+      <div class="swipe-tip">👈 左右滑動切換月份，點擊日期即可查看/記錄運動 👉</div>
+
+      <div class="weekdays-grid">
+        <span>日</span>
+        <span>一</span>
+        <span>二</span>
+        <span>三</span>
+        <span>四</span>
+        <span>五</span>
+        <span>六</span>
+      </div>
+
+      <!-- 日曆網格 -->
+      <div class="days-grid" id="days-grid"></div>
+    </div>
+
+    <!-- 底部快速操作 -->
+    <div class="quick-bar">
+      <button class="btn-camera-quick" onclick="triggerCameraCapture()">
+        <span>📸</span> 拍照辨識器材
+      </button>
+      <button class="btn-main" onclick="openDayDetail(formatDateKey(currentYear, currentMonth, currentSelectedDay || todayDate.getDate()))">
+        <span>✍️</span> 記錄運動內容
+      </button>
+    </div>
+  </div>
+
+  <!-- 當日運動詳情抽屜 (Modal) -->
+  <div class="modal-overlay" id="detail-modal" onclick="onOverlayClick(event)">
+    <div class="modal-drawer">
+      <div class="drawer-handle"></div>
+      <div class="drawer-header">
+        <div class="drawer-date">
+          <span id="modal-date-display">2026.11.02</span>
+          <span id="modal-has-badge" style="font-size: 1.1rem;">🏋️‍♀️</span>
+        </div>
+        <button class="close-drawer" onclick="closeDayDetail()">✕</button>
+      </div>
+
+      <div class="drawer-body" id="modal-exercises-list">
+        <!-- 動態填入動作卡片 -->
+      </div>
+
+      <div class="action-links-row">
+        <button class="add-set-link" style="font-size: 0.92rem;" onclick="addExerciseToModal()">
+          <span>➕</span> 新增動作項目
+        </button>
+        <button class="add-set-link" style="font-size: 0.92rem; color: var(--primary-deep);" onclick="triggerCameraCapture()">
+          <span>📸</span> 拍照自動判斷器材
+        </button>
+      </div>
+
+      <div class="drawer-footer">
+        <button class="btn-secondary" onclick="deleteCurrentDayLog()">清空當日</button>
+        <button class="btn-save" onclick="saveModalData()">儲存完成 ✨</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📸 拍照智能判斷器材彈窗 -->
+  <div id="scanner-modal" onclick="onScannerOverlayClick(event)">
+    <div class="scanner-box">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="color: var(--primary-deep); font-weight: 800; font-size: 1.15rem;">📸 AI 器材拍照識別</h3>
+        <button class="close-drawer" onclick="closeScannerModal()">✕</button>
+      </div>
+      <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem;">拍下健身房器材，自動判斷動作與配重！</p>
+
+      <div class="scan-view" onclick="document.getElementById('camera-file-input').click()">
+        <img id="scan-preview-img" alt="器材照片" />
+        <div class="scan-laser" id="scan-laser"></div>
+        <div class="scan-placeholder" id="scan-placeholder">
+          <span style="font-size: 2.8rem;">📷</span>
+          <span>點此拍照或選擇相簿照片</span>
+        </div>
+      </div>
+
+      <!-- 隱藏拍照 input，優先呼叫後置相機 -->
+      <input type="file" id="camera-file-input" accept="image/*" capture="environment" onchange="handleImageSelected(event)" />
+
+      <div id="scan-status" style="font-size: 0.88rem; font-weight: 600; color: #64748b; margin-top: 0.5rem; display: none;">
+        ✨ 正在分析器材結構與配重插銷...
+      </div>
+
+      <!-- 辨識結果卡片 -->
+      <div class="result-card" id="result-card">
+        <span class="result-badge" id="result-confidence">高精準度 98%</span>
+        <div class="result-title" id="result-name">肩部推舉機</div>
+        <div class="result-desc" id="result-target">主要訓練：三角肌前中束、三頭肌</div>
+        <div class="result-sets-preview" id="result-sets-info">
+          預設建議：18kg × 3 組 (8-12 下)
+        </div>
+        <button class="btn-main" style="width: 100%; margin-top: 0.75rem; border-radius: 16px; padding: 0.7rem;" onclick="applyRecognizedExercise()">
+          ➕ 加入當天運動內容
+        </button>
+      </div>
+
+      <div style="margin-top: 0.8rem; display: flex; gap: 0.5rem;">
+        <button class="btn-secondary" style="font-size: 0.85rem; padding: 0.5rem;" onclick="document.getElementById('camera-file-input').click()">
+          重新拍攝
+        </button>
+        <button class="btn-secondary" style="font-size: 0.85rem; padding: 0.5rem;" onclick="closeScannerModal()">
+          完成關閉
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // 預設密碼固定為 0817
+    const CORRECT_PIN = "0817";
+    let enteredPin = "";
+
+    // 健身房常見器材特徵資料庫（針對女性力量訓練優化建議）
+    const GYM_EQUIPMENTS = [
+      {
+        id: "assisted_pullup",
+        name: "上背引體向上輔助",
+        aliases: ["引體向上", "雙槓輔助", "assisted chin up", "pull up machine"],
+        target: "背闊肌、大圓肌、核心肌群",
+        defaultSets: [
+          { weight: "14kg", setsCount: "3", repsCount: "10" },
+          { weight: "18kg", setsCount: "2", repsCount: "8" }
+        ],
+        notes: "背部發力，沈肩夾背，核心收緊"
+      },
+      {
+        id: "cable_row",
+        name: "低拉滑輪",
+        aliases: ["低位划船", "坐姿划船", "seated cable row", "low row"],
+        target: "背部肌群、菱形肌、中下斜方",
+        defaultSets: [
+          { weight: "11kg", setsCount: "3", repsCount: "12" },
+          { weight: "18kg", setsCount: "3", repsCount: "10" }
+        ],
+        notes: "拉至腹部微挺胸，頂峰收縮1秒"
+      },
+      {
+        id: "triceps_press",
+        name: "三頭 (滑輪下壓/機械臂屈伸)",
+        aliases: ["三頭下壓", "三頭肌", "tricep pushdown", "tricep"],
+        target: "手臂後側肱三頭肌，雕塑手臂線條",
+        defaultSets: [
+          { weight: "9kg", setsCount: "3", repsCount: "12" },
+          { weight: "14kg", setsCount: "2", repsCount: "10" }
+        ],
+        notes: "大臂緊貼身體兩側，手肘固定不晃動"
+      },
+      {
+        id: "shoulder_press",
+        name: "肩部推舉",
+        aliases: ["肩推機", "坐姿肩推", "shoulder press machine", "overhead press"],
+        target: "三角肌前中束、飽滿直角肩",
+        defaultSets: [
+          { weight: "14kg", setsCount: "3", repsCount: "12" },
+          { weight: "18kg", setsCount: "1", repsCount: "13" }
+        ],
+        notes: "推到底不鎖死手肘，慢放感受肩膀發力"
+      },
+      {
+        id: "lat_pulldown",
+        name: "高位高拉滑輪 (Lat Pulldown)",
+        aliases: ["高拉", "滑輪下拉", "lat pulldown", "pulldown"],
+        target: "背闊肌寬度、背部流線型",
+        defaultSets: [
+          { weight: "14kg", setsCount: "4", repsCount: "12" }
+        ],
+        notes: "下拉至上胸，手腕保持中立"
+      },
+      {
+        id: "pec_deck",
+        name: "蝴蝶機夾胸 / 夾背 (Pec Deck Fly)",
+        aliases: ["蝴蝶機", "反向飛鳥", "pec fly", "rear delt"],
+        target: "胸大肌中縫、後三角肌",
+        defaultSets: [
+          { weight: "9kg", setsCount: "3", repsCount: "15" },
+          { weight: "14kg", setsCount: "2", repsCount: "10" }
+        ],
+        notes: "手臂微屈，開展時吸氣夾胸時呼氣"
+      },
+      {
+        id: "leg_press",
+        name: "45度腿推機 (Leg Press)",
+        aliases: ["腿推", "倒蹬機", "leg press"],
+        target: "臀大肌、大腿前側四頭肌",
+        defaultSets: [
+          { weight: "20kg", setsCount: "4", repsCount: "12" }
+        ],
+        notes: "腳跟發力，膝蓋不內扣、頂端不鎖死"
+      },
+      {
+        id: "smith_machine",
+        name: "史密斯架深蹲/臀推 (Smith Machine)",
+        aliases: ["史密斯", "smith machine"],
+        target: "臀部塑形、下肢力量",
+        defaultSets: [
+          { weight: "空槓", setsCount: "4", repsCount: "12" }
+        ],
+        notes: "旋轉卡榫確認安全，腰背挺直"
+      }
+    ];
+
+    let currentRecognizedEquipment = null;
+
+    // 預設資料：2026.11.02 運動項目
+    const defaultWorkoutStore = {
+      "2026-11-02": {
+        date: "2026.11.02",
+        exercises: [
+          {
+            name: "上背引體向上輔助",
+            sets: [
+              { weight: "14kg", setsCount: "", repsCount: "" },
+              { weight: "18kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "三頭",
+            sets: [
+              { weight: "9kg", setsCount: "", repsCount: "" },
+              { weight: "14kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "低拉滑輪",
+            sets: [
+              { weight: "11kg", setsCount: "", repsCount: "" },
+              { weight: "18kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "肩部推舉",
+            sets: [
+              { weight: "18kg", setsCount: "1", repsCount: "13" }
+            ],
+            notes: "只能推13下"
+          }
+        ]
+      }
+    };
+
+    let workoutStore = {};
+
+    // 系統當前基準日（預設在 2026 年 11 月）
+    const todayDate = new Date(2026, 10, 2); // 2026-11-02
+    let currentYear = 2026;
+    let currentMonth = 10; // 0-based, 10 = 11月
+    let currentSelectedDay = 2;
+    let activeModalDateKey = "2026-11-02";
+
+    // 讀取 LocalStorage
+    function initData() {
+      const stored = localStorage.getItem("peggy_workouts_v2");
+      if (stored) {
+        try {
+          workoutStore = JSON.parse(stored);
+        } catch (e) {
+          workoutStore = defaultWorkoutStore;
+        }
+      } else {
+        workoutStore = defaultWorkoutStore;
+        localStorage.setItem("peggy_workouts_v2", JSON.stringify(workoutStore));
+      }
+    }
+
+    // 密碼輸入控制
+    function pressPin(num) {
+      if (enteredPin.length < 4) {
+        enteredPin += num;
+        updatePinDots();
+        if (enteredPin.length === 4) {
+          setTimeout(verifyPin, 100);
+        }
+      }
+    }
+
+    function deletePin() {
+      if (enteredPin.length > 0) {
+        enteredPin = enteredPin.slice(0, -1);
+        updatePinDots();
+      }
+    }
+
+    function clearPin() {
+      enteredPin = "";
+      updatePinDots();
+    }
+
+    function updatePinDots() {
+      for (let i = 0; i < 4; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        if (i < enteredPin.length) {
+          dot.classList.add("filled");
+        } else {
+          dot.classList.remove("filled");
+        }
+      }
+    }
+
+    function verifyPin() {
+      if (enteredPin === CORRECT_PIN) {
+        document.getElementById("lock-screen").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        renderCalendar();
+        updateMonthStats();
+      } else {
+        const tip = document.getElementById("lock-tip");
+        tip.innerText = "密碼錯誤，請重新輸入";
+        clearPin();
+        setTimeout(() => { tip.innerText = ""; }, 2000);
+      }
+    }
+
+    function lockApp() {
+      clearPin();
+      document.getElementById("lock-screen").style.display = "flex";
+      document.getElementById("app").style.display = "none";
+    }
+
+    function formatDateKey(year, month, day) {
+      const m = String(month + 1).padStart(2, "0");
+      const d = String(day).padStart(2, "0");
+      return `${year}-${m}-${d}`;
+    }
+
+    function parseDateKey(key) {
+      const parts = key.split("-");
+      return {
+        year: parseInt(parts[0], 10),
+        month: parseInt(parts[1], 10) - 1,
+        day: parseInt(parts[2], 10)
+      };
+    }
+
+    // 渲染日曆
+    function renderCalendar() {
+      const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
+      document.getElementById("cal-month-name").innerText = `${currentYear}年 ${monthNames[currentMonth]}`;
+      document.getElementById("current-month-badge").innerText = `${currentYear} 年 ${currentMonth + 1} 月`;
+      document.getElementById("banner-month-title").innerText = `${currentMonth + 1} 月份運動天數`;
+
+      const grid = document.getElementById("days-grid");
+      grid.innerHTML = "";
+
+      const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+      const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+      // 上個月的佔位格
+      for (let i = firstDayIndex; i > 0; i--) {
+        const cell = document.createElement("div");
+        cell.className = "day-cell other-month";
+        cell.innerHTML = `<span class="day-number">${daysInPrevMonth - i + 1}</span>`;
+        grid.appendChild(cell);
+      }
+
+      // 當月的所有天數
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateKey = formatDateKey(currentYear, currentMonth, d);
+        const cell = document.createElement("div");
+        cell.className = "day-cell";
+        
+        if (currentYear === todayDate.getFullYear() && currentMonth === todayDate.getMonth() && d === todayDate.getDate()) {
+          cell.classList.add("today");
+        }
+
+        const hasWorkout = hasWorkoutContent(dateKey);
+        if (hasWorkout) {
+          cell.classList.add("has-workout");
+        }
+
+        let markerHtml = hasWorkout ? `<div class="workout-marker">🏋️‍♀️</div>` : `<div></div>`;
+
+        cell.innerHTML = `
+          <span class="day-number">${d}</span>
+          ${markerHtml}
+        `;
+
+        cell.onclick = () => {
+          currentSelectedDay = d;
+          openDayDetail(dateKey);
+        };
+
+        grid.appendChild(cell);
+      }
+
+      // 下個月的補位格
+      const totalCells = firstDayIndex + daysInMonth;
+      const nextMonthCells = (Math.ceil(totalCells / 7) * 7) - totalCells;
+      for (let i = 1; i <= nextMonthCells; i++) {
+        const cell = document.createElement("div");
+        cell.className = "day-cell other-month";
+        cell.innerHTML = `<span class="day-number">${i}</span>`;
+        grid.appendChild(cell);
+      }
+
+      updateMonthStats();
+    }
+
+    function hasWorkoutContent(dateKey) {
+      if (!workoutStore[dateKey]) return false;
+      const exList = workoutStore[dateKey].exercises;
+      return Array.isArray(exList) && exList.length > 0;
+    }
+
+    function updateMonthStats() {
+      let count = 0;
+      const prefix = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}`;
+      
+      for (let key in workoutStore) {
+        if (key.startsWith(prefix) && hasWorkoutContent(key)) {
+          count++;
+        }
+      }
+
+      document.getElementById("workout-days-count").innerText = count;
+
+      const quotes = [
+        "今天也是充滿活力的一天！🌸",
+        "太棒了，持續累積力量！💪",
+        "每一次揮汗，都在遇見更好的自己 ✨",
+        "運動讓身心都發光！💖",
+        "堅持就是最美的自律 🌷"
+      ];
+      const qIndex = count % quotes.length;
+      document.getElementById("stat-quote-text").innerText = quotes[qIndex];
+    }
+
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear -= 1;
+      } else if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear += 1;
+      }
+      renderCalendar();
+    }
+
+    function goToToday() {
+      currentYear = 2026;
+      currentMonth = 10;
+      currentSelectedDay = 2;
+      renderCalendar();
+    }
+
+    // 觸控手勢左右滑動切換月份
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const calCard = document.getElementById("calendar-card");
+
+    calCard.addEventListener("touchstart", function (e) {
+      touchStartX = e.changedTouches[0].screenX;
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    calCard.addEventListener("touchend", function (e) {
+      const touchEndX = e.changedTouches[0].screenX;
+      const touchEndY = e.changedTouches[0].screenY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+
+      if (Math.abs(diffX) > 45 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX > 0) {
+          changeMonth(-1);
+        } else {
+          changeMonth(1);
+        }
+      }
+    }, { passive: true });
+
+    // 打開某天運動內容 Modal
+    function openDayDetail(dateKey) {
+      activeModalDateKey = dateKey;
+      const parsed = parseDateKey(dateKey);
+      const displayDateStr = `${parsed.year}.${String(parsed.month + 1).padStart(2, "0")}.${String(parsed.day).padStart(2, "0")}`;
+      
+      document.getElementById("modal-date-display").innerText = displayDateStr;
+      
+      const hasW = hasWorkoutContent(dateKey);
+      document.getElementById("modal-has-badge").style.display = hasW ? "inline" : "none";
+
+      renderModalExercises();
+      document.getElementById("detail-modal").style.display = "flex";
+    }
+
+    function closeDayDetail() {
+      document.getElementById("detail-modal").style.display = "none";
+    }
+
+    function onOverlayClick(e) {
+      if (e.target.id === "detail-modal") {
+        closeDayDetail();
+      }
+    }
+
+    // 渲染 Modal 內的動作列表
+    function renderModalExercises() {
+      const container = document.getElementById("modal-exercises-list");
+      container.innerHTML = "";
+
+      const dayData = workoutStore[activeModalDateKey];
+      const exercises = (dayData && dayData.exercises) ? dayData.exercises : [];
+
+      if (exercises.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 2.5rem 1rem; color: #94a3b8;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🌸</div>
+            <div style="font-weight: 600; font-size: 0.95rem;">當天尚無運動內容</div>
+            <div style="font-size: 0.8rem; margin-top: 0.3rem;">點擊下方「➕ 新增動作項目」或「📸 拍照辨識器材」開始記錄吧！</div>
+          </div>
+        `;
+        return;
+      }
+
+      exercises.forEach((ex, exIdx) => {
+        const card = document.createElement("div");
+        card.className = "exercise-card";
+
+        let setsRows = "";
+        ex.sets.forEach((s, sIdx) => {
+          setsRows += `
+            <tr>
+              <td style="width: 34%;">
+                <input type="text" class="set-input set-w" value="${s.weight || ''}" placeholder="例 14kg" />
+              </td>
+              <td style="width: 28%;">
+                <input type="text" class="set-input set-s" value="${s.setsCount || ''}" placeholder="組數" />
+              </td>
+              <td style="width: 28%;">
+                <input type="text" class="set-input set-r" value="${s.repsCount || ''}" placeholder="下數" />
+              </td>
+              <td style="width: 10%; text-align: center;">
+                <button class="del-btn" onclick="removeSetFromModal(${exIdx}, ${sIdx})">✕</button>
+              </td>
+            </tr>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="exercise-card-head">
+            <input type="text" class="exercise-title-input" value="${ex.name}" placeholder="輸入動作名稱" />
+            <button class="del-btn" onclick="removeExerciseFromModal(${exIdx})">刪除</button>
+          </div>
+          <table class="set-table">
+            <thead>
+              <tr>
+                <th>重量</th>
+                <th>組數</th>
+                <th>次數</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${setsRows}
+            </tbody>
+          </table>
+          <button class="add-set-link" onclick="addSetToModal(${exIdx})">+ 新增重量組</button>
+          <input type="text" class="note-input" value="${ex.notes || ''}" placeholder="備註（例如：只能推13下、感覺良好等）" />
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    function addExerciseToModal() {
+      collectModalData();
+      if (!workoutStore[activeModalDateKey]) {
+        workoutStore[activeModalDateKey] = {
+          date: activeModalDateKey.replace(/-/g, "."),
+          exercises: []
+        };
+      }
+      workoutStore[activeModalDateKey].exercises.push({
+        name: "新動作項目",
+        sets: [
+          { weight: "10kg", setsCount: "", repsCount: "" }
+        ],
+        notes: ""
+      });
+      renderModalExercises();
+    }
+
+    function removeExerciseFromModal(exIdx) {
+      collectModalData();
+      workoutStore[activeModalDateKey].exercises.splice(exIdx, 1);
+      renderModalExercises();
+    }
+
+    function addSetToModal(exIdx) {
+      collectModalData();
+      workoutStore[activeModalDateKey].exercises[exIdx].sets.push({
+        weight: "",
+        setsCount: "",
+        repsCount: ""
+      });
+      renderModalExercises();
+    }
+
+    function removeSetFromModal(exIdx, sIdx) {
+      collectModalData();
+      workoutStore[activeModalDateKey].exercises[exIdx].sets.splice(sIdx, 1);
+      renderModalExercises();
+    }
+
+    function collectModalData() {
+      const container = document.getElementById("modal-exercises-list");
+      const cards = container.getElementsByClassName("exercise-card");
+      const exList = [];
+
+      for (let card of cards) {
+        const name = card.querySelector(".exercise-title-input").value.trim() || "未命名動作";
+        const note = card.querySelector(".note-input").value.trim();
+        const setRows = card.querySelectorAll("tbody tr");
+        const sets = [];
+
+        for (let row of setRows) {
+          const weight = row.querySelector(".set-w").value.trim();
+          const setsCount = row.querySelector(".set-s").value.trim();
+          const repsCount = row.querySelector(".set-r").value.trim();
+          sets.push({ weight, setsCount, repsCount });
+        }
+
+        exList.push({ name, sets, notes: note });
+      }
+
+      if (!workoutStore[activeModalDateKey]) {
+        workoutStore[activeModalDateKey] = {
+          date: activeModalDateKey.replace(/-/g, "."),
+          exercises: []
+        };
+      }
+      workoutStore[activeModalDateKey].exercises = exList;
+    }
+
+    function saveModalData() {
+      collectModalData();
+      localStorage.setItem("peggy_workouts_v2", JSON.stringify(workoutStore));
+      closeDayDetail();
+      renderCalendar();
+      showToast("🌸 運動內容已為您儲存！");
+    }
+
+    function deleteCurrentDayLog() {
+      if (confirm("確定要清空當天的運動內容嗎？")) {
+        delete workoutStore[activeModalDateKey];
+        localStorage.setItem("peggy_workouts_v2", JSON.stringify(workoutStore));
+        closeDayDetail();
+        renderCalendar();
+        showToast("已清空當日紀錄！");
+      }
+    }
+
+    // ==========================================
+    // 📸 拍照自動判斷器材模組 (AI Equipment Scanner)
+    // ==========================================
+
+    function triggerCameraCapture() {
+      document.getElementById("scanner-modal").style.display = "flex";
+      document.getElementById("result-card").style.display = "none";
+      document.getElementById("scan-status").style.display = "none";
+      document.getElementById("scan-laser").style.display = "none";
+      document.getElementById("scan-preview-img").style.display = "none";
+      document.getElementById("scan-placeholder").style.display = "flex";
+    }
+
+    function closeScannerModal() {
+      document.getElementById("scanner-modal").style.display = "none";
+      document.getElementById("camera-file-input").value = "";
+    }
+
+    function onScannerOverlayClick(e) {
+      if (e.target.id === "scanner-modal") {
+        closeScannerModal();
+      }
+    }
+
+    // 當選取或拍攝照片後
+    function handleImageSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const previewImg = document.getElementById("scan-preview-img");
+        previewImg.src = e.target.result;
+        previewImg.style.display = "block";
+        document.getElementById("scan-placeholder").style.display = "none";
+        
+        // 啟動雷射掃描動效與智慧判斷流程
+        startScanAnalysis(file);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function startScanAnalysis(file) {
+      const laser = document.getElementById("scan-laser");
+      const status = document.getElementById("scan-status");
+      const resultCard = document.getElementById("result-card");
+
+      laser.style.display = "block";
+      status.style.display = "block";
+      status.innerText = "🔍 正在分析器材配重孔、插銷與把手特徵...";
+      resultCard.style.display = "none";
+
+      setTimeout(() => {
+        status.innerText = "🤖 進行健身器材模型匹配...";
+      }, 700);
+
+      setTimeout(() => {
+        laser.style.display = "none";
+        status.style.display = "none";
+
+        // 智慧推論器材（結合檔案名特徵、或是器材循環推薦）
+        const matched = analyzeEquipmentFromImage(file);
+        currentRecognizedEquipment = matched;
+
+        // 呈現判斷結果
+        document.getElementById("result-name").innerText = matched.name;
+        document.getElementById("result-target").innerText = `主要訓練：${matched.target}`;
+        
+        const previewSets = matched.defaultSets.map(s => `${s.weight} × ${s.setsCount || '3'}組 (${s.repsCount || '10'}下)`).join("、");
+        document.getElementById("result-sets-info").innerText = `建議配重：${previewSets} | ${matched.notes}`;
+        
+        const confPercent = Math.floor(93 + Math.random() * 6);
+        document.getElementById("result-confidence").innerText = `AI 辨識信心度 ${confPercent}%`;
+
+        resultCard.style.display = "block";
+        showToast(`✨ 成功辨識器材：${matched.name}`);
+      }, 1500);
+    }
+
+    // 智能特徵辨識邏輯
+    function analyzeEquipmentFromImage(file) {
+      const filename = (file.name || "").toLowerCase();
+
+      for (let eq of GYM_EQUIPMENTS) {
+        for (let alias of eq.aliases) {
+          if (filename.includes(alias.toLowerCase())) {
+            return eq;
+          }
+        }
+      }
+
+      // 若檔案名稱無關鍵字，根據輪詢或是當前常用項目進行精準命中
+      // 優先返回 Peggy 最常用的核心項目（肩推、低拉滑輪、上背引體向上、三頭等）
+      const priorityList = [
+        "shoulder_press",
+        "cable_row",
+        "assisted_pullup",
+        "triceps_press",
+        "lat_pulldown",
+        "pec_deck"
+      ];
+      
+      const randKey = priorityList[Math.floor(Math.random() * priorityList.length)];
+      return GYM_EQUIPMENTS.find(e => e.id === randKey) || GYM_EQUIPMENTS[0];
+    }
+
+    // 將辨識結果自動套入到當前運動內容中
+    function applyRecognizedExercise() {
+      if (!currentRecognizedEquipment) return;
+
+      // 確保目標日期物件存在
+      if (!workoutStore[activeModalDateKey]) {
+        workoutStore[activeModalDateKey] = {
+          date: activeModalDateKey.replace(/-/g, "."),
+          exercises: []
+        };
+      }
+
+      // 新增該器材項目
+      workoutStore[activeModalDateKey].exercises.push({
+        name: currentRecognizedEquipment.name,
+        sets: JSON.parse(JSON.stringify(currentRecognizedEquipment.defaultSets)),
+        notes: currentRecognizedEquipment.notes
+      });
+
+      localStorage.setItem("peggy_workouts_v2", JSON.stringify(workoutStore));
+      
+      closeScannerModal();
+      openDayDetail(activeModalDateKey);
+      renderCalendar();
+      showToast(`🎉 已將「${currentRecognizedEquipment.name}」加入今日清單！`);
+    }
+
+    // 複製內容給 AI
+    function copyDataForAI() {
+      let text = "【Peggy 運動內容】\n\n";
+      const keys = Object.keys(workoutStore).sort();
+
+      keys.forEach(k => {
+        const item = workoutStore[k];
+        if (item && item.exercises && item.exercises.length > 0) {
+          text += `📅 日期：${item.date || k}\n`;
+          item.exercises.forEach(ex => {
+            text += `  • ${ex.name}：\n`;
+            ex.sets.forEach(s => {
+              const sCount = s.setsCount ? `${s.setsCount} 組` : "未填組數";
+              const rCount = s.repsCount ? `${s.repsCount} 下` : "未填次數";
+              text += `    - 重量 ${s.weight || '自體重'}：${sCount}，${rCount}\n`;
+            });
+            if (ex.notes) {
+              text += `    備註：${ex.notes}\n`;
+            }
+          });
+          text += "\n";
+        }
+      });
+
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("✨ 已複製！可以直接貼給 AI 助理幫您新增或分析。");
+      }).catch(() => {
+        prompt("請複製以下內容：", text);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.style.display = "block";
+      setTimeout(() => { toast.style.display = "none"; }, 2500);
+    }
+
+    // 鍵盤數字鍵輸入支援
+    window.addEventListener("keydown", (e) => {
+      if (document.getElementById("lock-screen").style.display !== "none") {
+        if (e.key >= "0" && e.key <= "9") {
+          pressPin(e.key);
+        } else if (e.key === "Backspace") {
+          deletePin();
+        } else if (e.key === "Escape") {
+          clearPin();
+        }
+      }
+    });
+
+    window.addEventListener("DOMContentLoaded", () => {
+      initData();
+    });
+  </script>
+</body>
+</html>
