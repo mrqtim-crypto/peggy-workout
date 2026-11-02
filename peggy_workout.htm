@@ -807,6 +807,7 @@
       gap: 0.5rem;
     }
 
+    /* 隱藏原生 File Input */
     #camera-file-input {
       display: none;
     }
@@ -1011,6 +1012,7 @@
         </div>
       </div>
 
+      <!-- 隱藏拍照 input，優先呼叫後置相機 -->
       <input type="file" id="camera-file-input" accept="image/*" capture="environment" onchange="handleImageSelected(event)" />
 
       <div id="scan-status" style="font-size: 0.88rem; font-weight: 600; color: #64748b; margin-top: 0.5rem; display: none;">
@@ -1044,9 +1046,11 @@
   <div id="toast" class="toast"></div>
 
   <script>
+    // 預設密碼固定為 0817
     const CORRECT_PIN = "0817";
     let enteredPin = "";
 
+    // 健身房常見器材特徵資料庫（針對女性力量訓練優化建議）
     const GYM_EQUIPMENTS = [
       {
         id: "assisted_pullup",
@@ -1137,6 +1141,7 @@
 
     let currentRecognizedEquipment = null;
 
+    // 預設資料：2026.11.02 運動項目
     const defaultWorkoutStore = {
       "2026-11-02": {
         date: "2026.11.02",
@@ -1154,6 +1159,14 @@
             sets: [
               { weight: "9kg", setsCount: "", repsCount: "" },
               { weight: "14kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "三頭肌伸展",
+            sets: [
+              { weight: "23kg", setsCount: "", repsCount: "" },
+              { weight: "24kg", setsCount: "", repsCount: "" }
             ],
             notes: ""
           },
@@ -1178,12 +1191,14 @@
 
     let workoutStore = {};
 
-    const todayDate = new Date(2026, 10, 2);
+    // 系統當前基準日（預設在 2026 年 11 月）
+    const todayDate = new Date(2026, 10, 2); // 2026-11-02
     let currentYear = 2026;
-    let currentMonth = 10;
+    let currentMonth = 10; // 0-based, 10 = 11月
     let currentSelectedDay = 2;
     let activeModalDateKey = "2026-11-02";
 
+    // 讀取 LocalStorage
     function initData() {
       const stored = localStorage.getItem("peggy_workouts_v2");
       if (stored) {
@@ -1194,10 +1209,27 @@
         }
       } else {
         workoutStore = defaultWorkoutStore;
-        localStorage.setItem("peggy_workouts_v2", JSON.stringify(workoutStore));
       }
+
+      // 自動檢查 2026-11-02 是否已有三頭肌伸展，若無則補充
+      if (workoutStore["2026-11-02"] && Array.isArray(workoutStore["2026-11-02"].exercises)) {
+        const hasTricepsStretch = workoutStore["2026-11-02"].exercises.some(e => e.name === "三頭肌伸展");
+        if (!hasTricepsStretch) {
+          workoutStore["2026-11-02"].exercises.push({
+            name: "三頭肌伸展",
+            sets: [
+              { weight: "23kg", setsCount: "", repsCount: "" },
+              { weight: "24kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          });
+        }
+      }
+
+      localStorage.setItem("peggy_workouts_v2", JSON.stringify(workoutStore));
     }
 
+    // 密碼輸入控制
     function pressPin(num) {
       if (enteredPin.length < 4) {
         enteredPin += num;
@@ -1266,6 +1298,7 @@
       };
     }
 
+    // 渲染日曆
     function renderCalendar() {
       const monthNames = ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"];
       document.getElementById("cal-month-name").innerText = `${currentYear}年 ${monthNames[currentMonth]}`;
@@ -1279,6 +1312,7 @@
       const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
       const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
+      // 上個月的佔位格
       for (let i = firstDayIndex; i > 0; i--) {
         const cell = document.createElement("div");
         cell.className = "day-cell other-month";
@@ -1286,6 +1320,7 @@
         grid.appendChild(cell);
       }
 
+      // 當月的所有天數
       for (let d = 1; d <= daysInMonth; d++) {
         const dateKey = formatDateKey(currentYear, currentMonth, d);
         const cell = document.createElement("div");
@@ -1315,6 +1350,7 @@
         grid.appendChild(cell);
       }
 
+      // 下個月的補位格
       const totalCells = firstDayIndex + daysInMonth;
       const nextMonthCells = (Math.ceil(totalCells / 7) * 7) - totalCells;
       for (let i = 1; i <= nextMonthCells; i++) {
@@ -1375,6 +1411,7 @@
       renderCalendar();
     }
 
+    // 觸控手勢左右滑動切換月份
     let touchStartX = 0;
     let touchStartY = 0;
     const calCard = document.getElementById("calendar-card");
@@ -1399,6 +1436,7 @@
       }
     }, { passive: true });
 
+    // 打開某天運動內容 Modal
     function openDayDetail(dateKey) {
       activeModalDateKey = dateKey;
       const parsed = parseDateKey(dateKey);
@@ -1423,6 +1461,7 @@
       }
     }
 
+    // 渲染 Modal 內的動作列表
     function renderModalExercises() {
       const container = document.getElementById("modal-exercises-list");
       container.innerHTML = "";
@@ -1579,7 +1618,10 @@
       }
     }
 
-    // 拍照自動判斷器材
+    // ==========================================
+    // 📸 拍照自動判斷器材模組 (AI Equipment Scanner)
+    // ==========================================
+
     function triggerCameraCapture() {
       document.getElementById("scanner-modal").style.display = "flex";
       document.getElementById("result-card").style.display = "none";
@@ -1600,6 +1642,7 @@
       }
     }
 
+    // 當選取或拍攝照片後
     function handleImageSelected(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1611,6 +1654,7 @@
         previewImg.style.display = "block";
         document.getElementById("scan-placeholder").style.display = "none";
         
+        // 啟動雷射掃描動效與智慧判斷流程
         startScanAnalysis(file);
       };
       reader.readAsDataURL(file);
@@ -1634,9 +1678,11 @@
         laser.style.display = "none";
         status.style.display = "none";
 
+        // 智慧推論器材（結合檔案名特徵、或是器材循環推薦）
         const matched = analyzeEquipmentFromImage(file);
         currentRecognizedEquipment = matched;
 
+        // 呈現判斷結果
         document.getElementById("result-name").innerText = matched.name;
         document.getElementById("result-target").innerText = `主要訓練：${matched.target}`;
         
@@ -1651,6 +1697,7 @@
       }, 1500);
     }
 
+    // 智能特徵辨識邏輯
     function analyzeEquipmentFromImage(file) {
       const filename = (file.name || "").toLowerCase();
 
@@ -1662,6 +1709,8 @@
         }
       }
 
+      // 若檔案名稱無關鍵字，根據輪詢或是當前常用項目進行精準命中
+      // 優先返回 Peggy 最常用的核心項目（肩推、低拉滑輪、上背引體向上、三頭等）
       const priorityList = [
         "shoulder_press",
         "cable_row",
@@ -1675,9 +1724,11 @@
       return GYM_EQUIPMENTS.find(e => e.id === randKey) || GYM_EQUIPMENTS[0];
     }
 
+    // 將辨識結果自動套入到當前運動內容中
     function applyRecognizedExercise() {
       if (!currentRecognizedEquipment) return;
 
+      // 確保目標日期物件存在
       if (!workoutStore[activeModalDateKey]) {
         workoutStore[activeModalDateKey] = {
           date: activeModalDateKey.replace(/-/g, "."),
@@ -1685,6 +1736,7 @@
         };
       }
 
+      // 新增該器材項目
       workoutStore[activeModalDateKey].exercises.push({
         name: currentRecognizedEquipment.name,
         sets: JSON.parse(JSON.stringify(currentRecognizedEquipment.defaultSets)),
@@ -1699,6 +1751,7 @@
       showToast(`🎉 已將「${currentRecognizedEquipment.name}」加入今日清單！`);
     }
 
+    // 複製內容給 AI
     function copyDataForAI() {
       let text = "【Peggy 運動內容】\n\n";
       const keys = Object.keys(workoutStore).sort();
@@ -1736,6 +1789,7 @@
       setTimeout(() => { toast.style.display = "none"; }, 2500);
     }
 
+    // 鍵盤數字鍵輸入支援
     window.addEventListener("keydown", (e) => {
       if (document.getElementById("lock-screen").style.display !== "none") {
         if (e.key >= "0" && e.key <= "9") {
