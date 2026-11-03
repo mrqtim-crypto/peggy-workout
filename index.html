@@ -1186,17 +1186,93 @@
             notes: "只能推13下"
           }
         ]
+      },
+      "2026-11-03": {
+        date: "2026.11.03",
+        exercises: [
+          {
+            name: "上背引體向上",
+            sets: [
+              { weight: "14kg", setsCount: "", repsCount: "" },
+              { weight: "18kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "三頭",
+            sets: [
+              { weight: "9kg", setsCount: "", repsCount: "" },
+              { weight: "14kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "低拉滑輪",
+            sets: [
+              { weight: "11kg", setsCount: "", repsCount: "" },
+              { weight: "18kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "三頭肌伸展訓練",
+            sets: [
+              { weight: "23kg", setsCount: "", repsCount: "" },
+              { weight: "24.1kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "站立臀肌訓練",
+            sets: [
+              { weight: "38kg", setsCount: "", repsCount: "" },
+              { weight: "45kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "腰帶式臀推",
+            sets: [
+              { weight: "18kg", setsCount: "", repsCount: "" },
+              { weight: "25kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "45躺姿臀推",
+            sets: [
+              { weight: "80kg", setsCount: "", repsCount: "" }
+            ],
+            notes: "下次可再增"
+          },
+          {
+            name: "夾腿內",
+            sets: [
+              { weight: "41kg", setsCount: "", repsCount: "" },
+              { weight: "45kg", setsCount: "", repsCount: "" },
+              { weight: "50kg", setsCount: "", repsCount: "" }
+            ],
+            notes: ""
+          },
+          {
+            name: "髖外展",
+            sets: [
+              { weight: "23kg", setsCount: "", repsCount: "" }
+            ],
+            notes: "貼背"
+          }
+        ]
       }
     };
 
     let workoutStore = {};
 
-    // 系統當前基準日（預設在 2026 年 11 月）
-    const todayDate = new Date(2026, 10, 2); // 2026-11-02
+    // 系統當前基準日（2026 年 11 月 3 日）
+    const todayDate = new Date(2026, 10, 3); // 2026-11-03
     let currentYear = 2026;
     let currentMonth = 10; // 0-based, 10 = 11月
-    let currentSelectedDay = 2;
-    let activeModalDateKey = "2026-11-02";
+    let currentSelectedDay = 3;
+    let activeModalDateKey = "2026-11-03";
 
     // 讀取 LocalStorage
     function initData() {
@@ -1224,6 +1300,11 @@
             notes: ""
           });
         }
+      }
+
+      // 自動確保 2026-11-03 記錄存在
+      if (!workoutStore["2026-11-03"]) {
+        workoutStore["2026-11-03"] = defaultWorkoutStore["2026-11-03"];
       }
 
       localStorage.setItem("peggy_workouts_v2", JSON.stringify(workoutStore));
@@ -1407,7 +1488,7 @@
     function goToToday() {
       currentYear = 2026;
       currentMonth = 10;
-      currentSelectedDay = 2;
+      currentSelectedDay = 3;
       renderCalendar();
     }
 
